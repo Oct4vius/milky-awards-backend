@@ -6,6 +6,7 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { User } from './entities/user.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +36,7 @@ export class AuthService {
   
       return newUser.save()
     } catch (error) {
-      console.log({error})
+      console.error({error})
       return error.response as ErrorResponse
     }
   }
@@ -57,9 +58,39 @@ export class AuthService {
       }
       
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return error.response
     }
+  }
+
+  async login(loginUser: LoginUserDto) {
+    try {
+      const user = await User.findOne({ where: { email: loginUser.email } })
+
+      if(!user) throw new BadRequestException({
+        message: 'User not found',
+        statusCode: 403,
+      })
+
+      const isValidPassword = user.comparePassword(loginUser.password)
+
+      if(!isValidPassword) throw new BadRequestException({
+        message: 'Invalid password',
+        statusCode: 403,
+      })
+
+      const {password, ...restUser} = user
+
+      return {
+        user: restUser,
+        token: this.getJwtToken({ id: restUser.uuid }),
+      }
+      
+    } catch (error) {
+      console.error(error)
+      return error.response
+    }
+
   }
 
   findAll() {
