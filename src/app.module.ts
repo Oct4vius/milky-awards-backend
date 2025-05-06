@@ -4,8 +4,10 @@ import { AppService } from './app.service';
 import { AuthModule } from './routes/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './routes/auth/entities/user.entity';
-import { WhiteListEntry } from './routes/auth/entities/whitelist.entity';
+import { UserEntity } from './routes/auth/entities/user.entity';
+import { WhiteListEntryEntity } from './routes/auth/entities/whitelist.entity';
+import { OptionalCategoriesModule } from './routes/optional-categories/optional-categories.module';
+import { OptionalCategoriesEntity } from './routes/optional-categories/entities/optional-category.entity';
 
 @Module({
   imports: [AuthModule,
@@ -16,10 +18,10 @@ import { WhiteListEntry } from './routes/auth/entities/whitelist.entity';
       ssl: {
         rejectUnauthorized: false
       },
-      entities: [User, WhiteListEntry],
+      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity],
       autoLoadEntities: true,
       synchronize: false,
-    })
+    }), OptionalCategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { WhiteListEntry } from './entities/whitelist.entity';
+import { WhiteListEntryEntity } from './entities/whitelist.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
 import { LoginUserDto } from './dto/login-user.dto';
 
@@ -13,23 +13,23 @@ export class AuthService {
 
   constructor(private jwtService: JwtService) {}
 
-  async create(createDto: RegisterUserDto): Promise<User | ErrorResponse> {
+  async create(createDto: RegisterUserDto): Promise<UserEntity | ErrorResponse> {
     try{
-      const whitelist = await WhiteListEntry.findOne({ where: { email: createDto.email } })
+      const whitelist = await WhiteListEntryEntity.findOne({ where: { email: createDto.email } })
 
       if(!whitelist) throw new BadRequestException({
         message: 'Email not in whitelist',
         statusCode: 403,
       })
 
-      const user = await User.findOne({ where: { email: createDto.email } })
+      const user = await UserEntity.findOne({ where: { email: createDto.email } })
 
       if(user) throw new BadRequestException({
         message: 'User already exists',
         statusCode: 403,
       })
   
-      const newUser = User.create({
+      const newUser = UserEntity.create({
         ...createDto,
         name: whitelist.name
       })
@@ -50,7 +50,7 @@ export class AuthService {
         statusCode: (user as ErrorResponse).statusCode,
       })
 
-      const {password, ...newUser} = user as User
+      const {password, ...newUser} = user as UserEntity
 
       return {
         newUser,
@@ -65,7 +65,7 @@ export class AuthService {
 
   async login(loginUser: LoginUserDto) {
     try {
-      const user = await User.findOne({ where: { email: loginUser.email } })
+      const user = await UserEntity.findOne({ where: { email: loginUser.email } })
 
       if(!user) throw new BadRequestException({
         message: 'User not found',
@@ -93,21 +93,24 @@ export class AuthService {
 
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async findUserByUUID(uuid: string): Promise<UserEntity | ErrorResponse> {
+    try {
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+      const user = await UserEntity.findOne({ where: { uuid } })
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
+      if(!user) throw new BadRequestException({
+        message: 'User not found',
+        statusCode: 403,
+      })
 
+      return user
+    } catch (error) {
+      console.error(error)
+      return error.response as ErrorResponse
+    }
+  }
 
   checkToken(req: Request ): LoginResponse {
-
     const user = req['user'];
 
     return{

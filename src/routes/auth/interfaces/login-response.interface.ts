@@ -1,7 +1,7 @@
-import { User } from "../entities/user.entity";
+import { UserEntity } from "../entities/user.entity";
 
 
 export interface LoginResponse{
-    user: User;
+    user: UserEntity;
     token: string;
 }

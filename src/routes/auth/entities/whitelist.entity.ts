@@ -1,8 +1,8 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 
-@Entity()
-export class WhiteListEntry extends BaseEntity {
+@Entity({name: 'WhiteListEntry'})
+export class WhiteListEntryEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number;

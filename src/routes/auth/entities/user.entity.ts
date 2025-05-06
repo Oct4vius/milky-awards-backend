@@ -11,7 +11,7 @@ import {
 import { compareSync, hashSync } from 'bcrypt';
 
 @Entity({name: 'Users'})
-export class User extends BaseEntity {
+export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,6 +30,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: false })
   password: string;
+
+  @Column({ default: false })
+  admin: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
