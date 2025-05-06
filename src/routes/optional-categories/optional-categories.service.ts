@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
-import { UpdateOptionalCategoryDto } from './dto/update-optional-category.dto';
 import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
 import { IncrementVotesDto } from './dto/increment-votes.dto';
