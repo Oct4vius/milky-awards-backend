@@ -8,6 +8,7 @@ import { UserEntity } from './routes/auth/entities/user.entity';
 import { WhiteListEntryEntity } from './routes/auth/entities/whitelist.entity';
 import { OptionalCategoriesModule } from './routes/optional-categories/optional-categories.module';
 import { OptionalCategoriesEntity } from './routes/optional-categories/entities/optional-category.entity';
+import { SuggestionCategoriesModule } from './routes/suggestion-categories/suggestion-categories.module';
 
 @Module({
   imports: [AuthModule,
@@ -21,7 +22,7 @@ import { OptionalCategoriesEntity } from './routes/optional-categories/entities/
       entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity],
       autoLoadEntities: true,
       synchronize: false,
-    }), OptionalCategoriesModule
+    }), OptionalCategoriesModule, SuggestionCategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],

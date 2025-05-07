@@ -72,7 +72,6 @@ export class OptionalCategoriesService {
     }
   }
 
-
   findAll() {
     try {
       let optionalCategories = OptionalCategoriesEntity.find();
