@@ -29,12 +29,12 @@ export class AuthService {
         statusCode: 403,
       })
   
-      const newUser = UserEntity.create({
+      const newUser = await UserEntity.create({
         ...createDto,
         name: whitelist.name
-      })
+      }).save()
   
-      return newUser.save()
+      return newUser
     } catch (error) {
       console.error({error})
       return error.response as ErrorResponse
