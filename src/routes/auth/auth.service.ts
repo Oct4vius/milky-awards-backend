@@ -7,6 +7,8 @@ import { LoginResponse } from './interfaces/login-response.interface';
 import { UserEntity } from './entities/user.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
+import { CreateWhiteListUserDto } from './dto/create-whilelist-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -54,7 +56,7 @@ export class AuthService {
 
       return {
         newUser,
-        token: this.getJwtToken({ id: newUser.uuid }),
+        token: this.getJwtToken({ id: newUser.uuid })
       }
       
     } catch (error) {
@@ -118,6 +120,81 @@ export class AuthService {
       token: this.getJwtToken({ id: user.id }),
     }
   }
+
+ async getWhiteList() {
+  try {
+    const whitelist = await WhiteListEntryEntity.find()
+    
+    if(!whitelist) throw new BadRequestException({
+      message: 'WhiteList Is Empty',
+      statusCode: 404,
+    })
+    
+    return whitelist
+
+  } catch (error) {
+    console.error(error)
+    return error.response as ErrorResponse
+  }
+ }
+
+
+
+ async getWhiteListByUuid(params: UuidParamValidator ){
+  try {
+    const {uuid} = params;
+    const whitelistUser = await WhiteListEntryEntity.findOne({where: {uuid}})
+
+    if(!whitelistUser) throw new BadRequestException({
+      message: 'Params Error',
+      statusCode: 403,
+    })
+
+    return whitelistUser
+
+  } catch (error) {
+    console.error(error)
+    return error.response as ErrorResponse
+  }
+ }
+
+ async createWhiteListUser(createWhiteListUserDto: CreateWhiteListUserDto) {
+  try {
+    const {email,name} = createWhiteListUserDto as WhiteListEntryEntity;
+    const whitelistUser = await WhiteListEntryEntity.create({email: email, name: name})
+
+    if(!whitelistUser) throw new BadRequestException({
+      message: 'User Empty',
+      statusCode: 403
+    })
+
+    return await whitelistUser.save()
+
+  } catch (error) {
+    console.error(error)
+    return error.response as ErrorResponse
+  }
+ }
+
+ async deleteWhiteListUser(params: UuidParamValidator) {
+  try {
+
+    const {uuid} = params;
+
+    await WhiteListEntryEntity.delete({ uuid})
+
+    if(!uuid) throw new BadRequestException({
+      message: 'Params Error',
+      statusCode: 403
+    })
+    
+    return await 'User Deleted'
+
+  } catch (error) {
+    console.error(error)
+    return error.response as ErrorResponse
+  }
+ }
 
   getJwtToken(payload: JwtPayload) {
 
