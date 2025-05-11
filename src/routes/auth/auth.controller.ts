@@ -29,12 +29,12 @@ export class AuthController {
     return await this.authService.getWhiteListByUuid(params);
   }
 
-  @Post('/createuser')
+  @Post('/whitelist')
   async createWhiteListUser(@Body() createWhiteListUserDto: CreateWhiteListUserDto) {
     return await this.authService.createWhiteListUser(createWhiteListUserDto)
   }
 
-  @Delete('/deleteuser/:uuid')
+  @Delete('/whitelist/:uuid')
   async deleteWhiteListUser(@Param() params: UuidParamValidator){{
     return await this.authService.deleteWhiteListUser(params)
   }}
