@@ -7,6 +7,7 @@ import { WhiteListEntryEntity } from './routes/auth/entities/whitelist.entity';
 import { OptionalCategoriesModule } from './routes/optional-categories/optional-categories.module';
 import { OptionalCategoriesEntity } from './routes/optional-categories/entities/optional-category.entity';
 import { SuggestionCategoriesModule } from './routes/suggestion-categories/suggestion-categories.module';
+import { SuggestionCategoryEntity } from './routes/suggestion-categories/entities/suggestion-category.entity';
 
 @Module({
   imports: [AuthModule,
@@ -17,7 +18,7 @@ import { SuggestionCategoriesModule } from './routes/suggestion-categories/sugge
       ssl: {
         rejectUnauthorized: false
       },
-      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity],
+      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity, SuggestionCategoryEntity],
       autoLoadEntities: true,
       synchronize: false,
     }), OptionalCategoriesModule, SuggestionCategoriesModule

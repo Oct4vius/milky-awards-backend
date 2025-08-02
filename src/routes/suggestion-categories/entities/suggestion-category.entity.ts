@@ -1,7 +1,7 @@
-import { Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'SuggestionCategories' })
-export class SuggestionCategory {
+export class SuggestionCategoryEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
