@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
-import { IncrementVotesDto } from './dto/increment-votes.dto';
+import { UuidParamValidator } from './dto/increment-votes.dto';
 
 @Injectable()
 export class OptionalCategoriesService {
@@ -34,7 +34,7 @@ export class OptionalCategoriesService {
     }
   }
 
-  async increase(params: IncrementVotesDto) {
+  async increase(params: UuidParamValidator) {
     try {
       const { uuid } = params;
 
@@ -53,7 +53,7 @@ export class OptionalCategoriesService {
     }
   }
 
-  async decrease(params: IncrementVotesDto) {
+  async decrease(params: UuidParamValidator) {
     try {
       const { uuid } = params;
 
