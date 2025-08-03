@@ -52,7 +52,7 @@ export class AuthService {
         statusCode: (user as ErrorResponse).statusCode,
       })
 
-      const {password, ...newUser} = user as UserEntity
+      const {password, id, ...newUser} = user as UserEntity
 
       return {
         newUser,
@@ -81,7 +81,7 @@ export class AuthService {
         statusCode: 403,
       })
 
-      const {password, ...restUser} = user
+      const {password, id, ...restUser} = user
 
       return {
         user: restUser,
