@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { WhiteListEntryEntity } from './entities/whitelist.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -12,195 +17,262 @@ import { CreateWhiteListUserDto } from './dto/create-whilelist-user.dto';
 
 @Injectable()
 export class AuthService {
-
   constructor(private jwtService: JwtService) {}
 
-  async create(createDto: RegisterUserDto): Promise<UserEntity | ErrorResponse> {
-    try{
-      const whitelist = await WhiteListEntryEntity.findOne({ where: { email: createDto.email } })
+  async create(
+    createDto: RegisterUserDto,
+  ): Promise<UserEntity | ErrorResponse> {
+    try {
+      const whitelist = await WhiteListEntryEntity.findOne({
+        where: { email: createDto.email },
+      });
 
-      if(!whitelist) throw new BadRequestException({
-        message: 'Email not in whitelist',
-        statusCode: 403,
-      })
+      if (!whitelist)
+        throw new HttpException({
+          message: 'Email not in whitelist',
+        }, HttpStatus.FORBIDDEN);
 
-      const user = await UserEntity.findOne({ where: { email: createDto.email } })
+      const user = await UserEntity.findOne({
+        where: { email: createDto.email },
+      });
 
-      if(user) throw new BadRequestException({
-        message: 'User already exists',
-        statusCode: 403,
-      })
-  
+      if (user)
+        throw new HttpException({
+          message: 'User already exists',
+        }, HttpStatus.BAD_REQUEST);
+
       const newUser = await UserEntity.create({
         ...createDto,
-        name: whitelist.name
-      }).save()
-  
-      return newUser
+        name: whitelist.name,
+      }).save();
+
+      return newUser;
     } catch (error) {
-      console.error({error})
-      return error.response as ErrorResponse
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async register(registerUser: RegisterUserDto) {
     try {
-      const user = await this.create(registerUser)
+      const user = await this.create(registerUser);
 
-      if((user as ErrorResponse).message) throw new BadRequestException({
-        message: (user as ErrorResponse).message || 'Error creating user',
-        statusCode: (user as ErrorResponse).statusCode,
-      })
+      if ((user as ErrorResponse).message)
+        throw new HttpException({
+          message: (user as ErrorResponse).message || 'Error creating user',
+          statusCode: (user as ErrorResponse).statusCode,
+        }, HttpStatus.BAD_REQUEST);
 
-      const {password, id, ...newUser} = user as UserEntity
+      const { password, id, ...newUser } = user as UserEntity;
 
       return {
         newUser,
-        token: this.getJwtToken({ id: newUser.uuid })
-      }
-      
+        token: this.getJwtToken({ id: newUser.uuid }),
+      };
     } catch (error) {
-      console.error(error)
-      return error.response
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async login(loginUser: LoginUserDto) {
     try {
-      const user = await UserEntity.findOne({ where: { email: loginUser.email } })
+      const user = await UserEntity.findOne({
+        where: { email: loginUser.email },
+      });
 
-      if(!user) throw new BadRequestException({
-        message: 'User not found',
-        statusCode: 403,
-      })
+      if (!user)
+        throw new HttpException(
+          {
+            message: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
-      const isValidPassword = user.comparePassword(loginUser.password)
+      const isValidPassword = user.comparePassword(loginUser.password);
 
-      if(!isValidPassword) throw new BadRequestException({
-        message: 'Invalid password',
-        statusCode: 403,
-      })
+      if (!isValidPassword)
+        throw new HttpException(
+          {
+            message: 'Invalid password',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
 
-      const {password, id, ...restUser} = user
+      const { password, id, ...restUser } = user;
 
       return {
         user: restUser,
         token: this.getJwtToken({ id: restUser.uuid }),
-      }
-      
+      };
     } catch (error) {
-      console.error(error)
-      return error.response
-    }
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findUserByUUID(uuid: string): Promise<UserEntity | ErrorResponse> {
     try {
+      const user = await UserEntity.findOne({ where: { uuid } });
 
-      const user = await UserEntity.findOne({ where: { uuid } })
+      if (!user)
+        throw new HttpException(
+          {
+            message: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
-      if(!user) throw new BadRequestException({
-        message: 'User not found',
-        statusCode: 403,
-      })
-
-      return user
+      return user;
     } catch (error) {
-      console.error(error)
-      return error.response as ErrorResponse
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  checkToken(req: Request ): LoginResponse {
+  checkToken(req: Request): LoginResponse {
     const user = req['user'];
 
-    return{
+    return {
       user,
       token: this.getJwtToken({ id: user.id }),
+    };
+  }
+
+  async getWhiteList() {
+    try {
+      const whitelist = await WhiteListEntryEntity.find();
+
+      if (!whitelist)
+        throw new HttpException(
+          {
+            message: 'WhiteList Is Empty',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+
+      return whitelist;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
- async getWhiteList() {
-  try {
-    const whitelist = await WhiteListEntryEntity.find()
-    
-    if(!whitelist) throw new BadRequestException({
-      message: 'WhiteList Is Empty',
-      statusCode: 404,
-    })
-    
-    return whitelist
+  async getWhiteListByUuid(params: UuidParamValidator) {
+    try {
+      const { uuid } = params;
+      const whitelistUser = await WhiteListEntryEntity.findOne({
+        where: { uuid },
+      });
 
-  } catch (error) {
-    console.error(error)
-    return error.response as ErrorResponse
+      if (!whitelistUser)
+        throw new HttpException(
+          {
+            message: 'Params Error',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+
+      return whitelistUser;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
- }
 
+  async createWhiteListUser(createWhiteListUserDto: CreateWhiteListUserDto) {
+    try {
+      const { email, name } = createWhiteListUserDto as WhiteListEntryEntity;
+      const whitelistUser = await WhiteListEntryEntity.create({
+        email: email,
+        name: name,
+      });
 
+      if (!whitelistUser)
+        throw new HttpException(
+          {
+            message: 'User Empty',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
 
- async getWhiteListByUuid(params: UuidParamValidator ){
-  try {
-    const {uuid} = params;
-    const whitelistUser = await WhiteListEntryEntity.findOne({where: {uuid}})
+      return await whitelistUser.save();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
-    if(!whitelistUser) throw new BadRequestException({
-      message: 'Params Error',
-      statusCode: 403,
-    })
-
-    return whitelistUser
-
-  } catch (error) {
-    console.error(error)
-    return error.response as ErrorResponse
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
- }
 
- async createWhiteListUser(createWhiteListUserDto: CreateWhiteListUserDto) {
-  try {
-    const {email,name} = createWhiteListUserDto as WhiteListEntryEntity;
-    const whitelistUser = await WhiteListEntryEntity.create({email: email, name: name})
+  async deleteWhiteListUser(params: UuidParamValidator) {
+    try {
+      const { uuid } = params;
 
-    if(!whitelistUser) throw new BadRequestException({
-      message: 'User Empty',
-      statusCode: 403
-    })
+      await WhiteListEntryEntity.delete({ uuid });
 
-    return await whitelistUser.save()
+      if (!uuid)
+        throw new HttpException(
+          {
+            message: 'Params Error',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
 
-  } catch (error) {
-    console.error(error)
-    return error.response as ErrorResponse
+      return 'User Deleted';
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
- }
-
- async deleteWhiteListUser(params: UuidParamValidator) {
-  try {
-
-    const {uuid} = params;
-
-    await WhiteListEntryEntity.delete({ uuid})
-
-    if(!uuid) throw new BadRequestException({
-      message: 'Params Error',
-      statusCode: 403
-    })
-    
-    return await 'User Deleted'
-
-  } catch (error) {
-    console.error(error)
-    return error.response as ErrorResponse
-  }
- }
 
   getJwtToken(payload: JwtPayload) {
-
-    return this.jwtService.sign( payload );
-    
+    return this.jwtService.sign(payload);
   }
-
-
 }
