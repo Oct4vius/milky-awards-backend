@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateSuggestionCategoryDto } from './dto/create-suggestion-category.dto';
 import { ErrorResponse } from 'src/interface/error.interface';
 import { SuggestionCategoryEntity } from './entities/suggestion-category.entity';
@@ -14,10 +14,9 @@ export class SuggestionCategoriesService {
       });
 
       if (suggestionExists)
-        throw new BadRequestException({
+        throw new HttpException({
           message: 'Suggestion already exists',
-          statusCode: 403,
-        });
+        }, HttpStatus.BAD_REQUEST);
 
       const newSuggestion = await SuggestionCategoryEntity.create({
         name,
@@ -25,8 +24,14 @@ export class SuggestionCategoriesService {
 
       return newSuggestion;
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -36,8 +41,14 @@ export class SuggestionCategoriesService {
 
       return suggestionCategories;
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { OptionalCategoriesEntity } from './entities/optional-category.entity';
-import { ErrorResponse } from 'src/interface/error.interface';
 import { UuidParamValidator } from './dto/increment-votes.dto';
 
 @Injectable()
@@ -16,10 +15,9 @@ export class OptionalCategoriesService {
       });
 
       if (doExists)
-        throw new BadRequestException({
+        throw new HttpException({
           message: 'Optional category already exists',
-          statusCode: 403,
-        });
+        }, HttpStatus.BAD_REQUEST);
 
       let newOptionalCategory = OptionalCategoriesEntity.create({
         name,
@@ -29,8 +27,14 @@ export class OptionalCategoriesService {
 
       return savedOptinalCategory;
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -42,14 +46,20 @@ export class OptionalCategoriesService {
         where: { uuid },
       });
 
-      if (!optionalCategory) throw new Error('Optional category not found');
+      if (!optionalCategory) throw new HttpException('Optional category not found', HttpStatus.NOT_FOUND);
 
       optionalCategory.incrementVotes();
 
       return optionalCategory.save();
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -61,14 +71,20 @@ export class OptionalCategoriesService {
         where: { uuid },
       });
 
-      if (!optionalCategory) throw new Error('Optional category not found');
+      if (!optionalCategory) throw new HttpException('Optional category not found', HttpStatus.NOT_FOUND);
 
       optionalCategory.decrementVotes();
 
       return optionalCategory.save();
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -78,8 +94,14 @@ export class OptionalCategoriesService {
 
       return optionalCategories;
     } catch (error) {
-      console.error({ error });
-      return error.response as ErrorResponse;
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
