@@ -8,12 +8,12 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { WhiteListEntryEntity } from './entities/whitelist.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { LoginResponse } from './interfaces/login-response.interface';
 import { UserEntity } from './entities/user.entity';
 import { ErrorResponse } from 'src/interface/error.interface';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
 import { CreateWhiteListUserDto } from './dto/create-whilelist-user.dto';
+import { verifyJwtToken } from 'src/utils/check-jwtoken.utils';
 
 @Injectable()
 export class AuthService {
@@ -28,18 +28,24 @@ export class AuthService {
       });
 
       if (!whitelist)
-        throw new HttpException({
-          message: 'Email not in whitelist',
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            message: 'Email not in whitelist',
+          },
+          HttpStatus.FORBIDDEN,
+        );
 
       const user = await UserEntity.findOne({
         where: { email: createDto.email },
       });
 
       if (user)
-        throw new HttpException({
-          message: 'User already exists',
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            message: 'User already exists',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
 
       const newUser = await UserEntity.create({
         ...createDto,
@@ -64,10 +70,13 @@ export class AuthService {
       const user = await this.create(registerUser);
 
       if ((user as ErrorResponse).message)
-        throw new HttpException({
-          message: (user as ErrorResponse).message || 'Error creating user',
-          statusCode: (user as ErrorResponse).statusCode,
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            message: (user as ErrorResponse).message || 'Error creating user',
+            statusCode: (user as ErrorResponse).statusCode,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
 
       const { password, id, ...newUser } = user as UserEntity;
 
@@ -96,7 +105,7 @@ export class AuthService {
       if (!user)
         throw new HttpException(
           {
-            message: 'User not found',
+            message: 'Email no encontrado',
           },
           HttpStatus.NOT_FOUND,
         );
@@ -106,7 +115,7 @@ export class AuthService {
       if (!isValidPassword)
         throw new HttpException(
           {
-            message: 'Invalid password',
+            message: 'Contraseña incorrecta',
           },
           HttpStatus.UNAUTHORIZED,
         );
@@ -154,13 +163,29 @@ export class AuthService {
     }
   }
 
-  checkToken(req: Request): LoginResponse {
-    const user = req['user'];
+  async checkToken(req: Request): Promise<void | ErrorResponse> {
+    try {
+      const token = this.extractTokenFromHeader(req);
 
-    return {
-      user,
-      token: this.getJwtToken({ id: user.id }),
-    };
+      if (!token) {
+        throw new HttpException(
+          'There is no bearer token',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await verifyJwtToken(token, this.jwtService);
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getWhiteList() {
@@ -272,7 +297,12 @@ export class AuthService {
     }
   }
 
-  getJwtToken(payload: JwtPayload) {
+  public getJwtToken(payload: JwtPayload) {
     return this.jwtService.sign(payload);
+  }
+
+  public extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers['authorization']?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

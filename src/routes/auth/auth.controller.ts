@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -17,6 +17,11 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginUserDto: LoginUserDto) {
     return await this.authService.login(loginUserDto);
+  }
+
+  @Get('/check-token')
+  async checkToken(@Req() req: Request) {
+    return this.authService.checkToken(req);
   }
 
   @Get('/whitelist')
