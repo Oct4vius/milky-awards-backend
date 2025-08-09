@@ -14,6 +14,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
 import { CreateWhiteListUserDto } from './dto/create-whilelist-user.dto';
 import { verifyJwtToken } from 'src/utils/check-jwtoken.utils';
+import { CheckIfWhitelistedDto } from './dto/check-if-whitelisted.dto';
 
 @Injectable()
 export class AuthService {
@@ -151,6 +152,36 @@ export class AuthService {
         );
 
       return user;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async checkIfWhitelisted(
+    checkIfWhitelistedDto: CheckIfWhitelistedDto,
+  ): Promise<boolean | ErrorResponse> {
+    try {
+      const { email } = checkIfWhitelistedDto;
+      const whitelistUser = await WhiteListEntryEntity.findOne({
+        where: { email },
+      });
+
+      if (!whitelistUser)
+        throw new HttpException(
+          {
+            message: 'Tu email no está en la whitelist. Dile a un admin que te añada.',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+
+      return true;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

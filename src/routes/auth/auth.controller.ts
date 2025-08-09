@@ -1,9 +1,18 @@
-import { Controller, Post, Body, Get, Param, Delete, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
 import { CreateWhiteListUserDto } from './dto/create-whilelist-user.dto';
+import { CheckIfWhitelistedDto } from './dto/check-if-whitelisted.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +26,11 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginUserDto: LoginUserDto) {
     return await this.authService.login(loginUserDto);
+  }
+
+  @Post('/check-if-whitelisted')
+  async checkIfWhitelisted(@Body() CheckIfWhitelistedDto: CheckIfWhitelistedDto) {
+    return await this.authService.checkIfWhitelisted(CheckIfWhitelistedDto);
   }
 
   @Get('/check-token')
@@ -35,13 +49,14 @@ export class AuthController {
   }
 
   @Post('/whitelist')
-  async createWhiteListUser(@Body() createWhiteListUserDto: CreateWhiteListUserDto) {
-    return await this.authService.createWhiteListUser(createWhiteListUserDto)
+  async createWhiteListUser(
+    @Body() createWhiteListUserDto: CreateWhiteListUserDto,
+  ) {
+    return await this.authService.createWhiteListUser(createWhiteListUserDto);
   }
 
   @Delete('/whitelist/:uuid')
-  async deleteWhiteListUser(@Param() params: UuidParamValidator){{
-    return await this.authService.deleteWhiteListUser(params)
-  }}
-
+  async deleteWhiteListUser(@Param() params: UuidParamValidator) {
+    return await this.authService.deleteWhiteListUser(params);
+  }
 }
