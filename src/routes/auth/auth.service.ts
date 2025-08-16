@@ -125,7 +125,7 @@ export class AuthService {
 
       return {
         user: restUser,
-        token: this.getJwtToken({ id: restUser.uuid }),
+        token: this.getJwtToken({ id: id.toString() }),
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -166,7 +166,7 @@ export class AuthService {
 
   async checkIfWhitelisted(
     checkIfWhitelistedDto: CheckIfWhitelistedDto,
-  ): Promise<boolean | ErrorResponse> {
+  ): Promise<void | ErrorResponse> {
     try {
       const { email } = checkIfWhitelistedDto;
       const whitelistUser = await WhiteListEntryEntity.findOne({
@@ -181,7 +181,6 @@ export class AuthService {
           HttpStatus.NOT_FOUND,
         );
 
-      return true;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -194,7 +193,7 @@ export class AuthService {
     }
   }
 
-  async checkToken(req: Request): Promise<void | ErrorResponse> {
+  async checkToken(req: Request): Promise<UserEntity | ErrorResponse> {
     try {
       const token = this.extractTokenFromHeader(req);
 
@@ -205,7 +204,18 @@ export class AuthService {
         );
       }
 
-      await verifyJwtToken(token, this.jwtService);
+      const result = await verifyJwtToken(token, this.jwtService);
+
+      const user = await UserEntity.findOne({ where: { id: +result.id }})
+
+      if (!user) {
+        throw new HttpException(
+          'User not found',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      return user;
 
     } catch (error) {
       if (error instanceof HttpException) {
