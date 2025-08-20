@@ -88,11 +88,20 @@ export class OptionalCategoriesService {
     }
   }
 
-  findAll() {
+  async findAll(): Promise<Array<{ uuid: string; name: string; votes: number; createdAt: Date; updatedAt: Date }>> {
     try {
-      let optionalCategories = OptionalCategoriesEntity.find();
+      const optionalCategories = await OptionalCategoriesEntity.find();
 
-      return optionalCategories;
+      if (!optionalCategories || optionalCategories.length === 0) {
+        throw new HttpException(
+          {
+            message: 'No optional categories found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return optionalCategories.map(({ id, ...rest }) => rest);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

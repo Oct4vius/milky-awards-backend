@@ -346,4 +346,29 @@ export class AuthService {
     const [type, token] = request.headers['authorization']?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
+
+  public async findUserById(id: string): Promise<UserEntity | ErrorResponse> {
+    try {
+      const user = await UserEntity.findOne({ where: {id: +id} });
+
+      if (!user)
+        throw new HttpException(
+          {
+            message: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+
+      return user;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
         secret: enviroments.JWT_SECRET,
       });
 
-      const user = await this.authservice.findUserByUUID(payload.id);
+      const user = await this.authservice.findUserById(payload.id);
       if (!user) throw new UnauthorizedException('User not found');
 
       request['user'] = user;
