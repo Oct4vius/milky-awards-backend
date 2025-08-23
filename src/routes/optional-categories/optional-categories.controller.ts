@@ -12,8 +12,8 @@ export class OptionalCategoriesController {
 
   
   @Get()
-  findAll() {
-    return this.optionalCategoriesService.findAll();
+  findAll(@Req() req) {
+    return this.optionalCategoriesService.findAll(req);
   }
 
 
@@ -28,8 +28,8 @@ export class OptionalCategoriesController {
   }
 
   @Patch('decrease/:uuid')
-  decrease(@Param() params: UuidParamValidator) {
-    return this.optionalCategoriesService.decrease(params);
+  decrease(@Param() params: UuidParamValidator, @Req() req) {
+    return this.optionalCategoriesService.decrease(params, req);
   }
   
 }

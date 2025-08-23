@@ -57,9 +57,22 @@ export class OptionalCategoriesService {
           HttpStatus.NOT_FOUND,
         );
 
+      if (optionalCategory.didUserVote(userUUID))
+        throw new HttpException(
+          'Ya tu votaste en eto. Dime a ve',
+          HttpStatus.BAD_REQUEST,
+        );
+
+
       optionalCategory.incrementVotes(userUUID);
 
-      optionalCategory.save();
+      const {votes, ...rest} = await optionalCategory.save();
+      
+      return {
+        ...rest,
+        votes: votes.length,
+        userVoted: votes === undefined ? false : votes.includes(userUUID),
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -72,9 +85,11 @@ export class OptionalCategoriesService {
     }
   }
 
-  async decrease(params: UuidParamValidator) {
+  async decrease(params: UuidParamValidator, req: Request) {
     try {
       const { uuid } = params;
+
+      const { uuid: userUUID } = req['user'];
 
       let optionalCategory = await OptionalCategoriesEntity.findOne({
         where: { uuid },
@@ -86,9 +101,21 @@ export class OptionalCategoriesService {
           HttpStatus.NOT_FOUND,
         );
 
-      // optionalCategory.decrementVotes();
+      if (!optionalCategory.didUserVote(userUUID))
+        throw new HttpException(
+          'Tu no has votado en eto. Dime a ve',
+          HttpStatus.BAD_REQUEST,
+        );
 
-      return optionalCategory.save();
+      optionalCategory.decrementVotes(userUUID);
+
+      const {votes, ...rest} = await optionalCategory.save();
+      
+      return {
+        ...rest,
+        votes: votes.length,
+        userVoted: votes === undefined ? false : votes.includes(userUUID),
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -101,17 +128,19 @@ export class OptionalCategoriesService {
     }
   }
 
-  async findAll(): Promise<
+  async findAll(req: Request): Promise<
     Array<{
       uuid: string;
       name: string;
       votes: number;
+      userVoted: boolean;
       createdAt: Date;
       updatedAt: Date;
     }>
   > {
     try {
       const optionalCategories = await OptionalCategoriesEntity.find();
+      const { uuid: userUUID } = req['user'];
 
       if (!optionalCategories || optionalCategories.length === 0) {
         throw new HttpException(
@@ -122,10 +151,12 @@ export class OptionalCategoriesService {
         );
       }
 
+
       const formattedCategories = optionalCategories.map(
         ({ id, votes, ...rest }) => ({
           ...rest,
-          votes: votes.length,
+          votes: votes.length ?? 0,
+          userVoted: votes === undefined ? false : votes.includes(userUUID),
         }),
       );
 

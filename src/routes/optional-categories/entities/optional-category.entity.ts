@@ -37,6 +37,11 @@ export class OptionalCategoriesEntity extends BaseEntity {
     this.votes = this.votes.filter((vote) => vote !== uuid);
   }
 
+
+  public didUserVote(uuid: string): boolean {
+    return this.votes.includes(uuid);
+  }
+
   public getVotesCount(): number {
     return this.votes.length;
   }
