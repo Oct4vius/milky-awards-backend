@@ -2,10 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { UuidParamValidator } from './dto/increment-votes.dto';
+import { Request } from 'express';
 
 @Injectable()
 export class OptionalCategoriesService {
-  
   async create(createOptionalCategoryDto: CreateOptionalCategoryDto) {
     try {
       const { name } = createOptionalCategoryDto;
@@ -15,9 +15,12 @@ export class OptionalCategoriesService {
       });
 
       if (doExists)
-        throw new HttpException({
-          message: 'Optional category already exists',
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            message: 'Optional category already exists',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
 
       let newOptionalCategory = OptionalCategoriesEntity.create({
         name,
@@ -38,19 +41,25 @@ export class OptionalCategoriesService {
     }
   }
 
-  async increase(params: UuidParamValidator) {
+  async increase(params: UuidParamValidator, req: Request) {
     try {
       const { uuid } = params;
+
+      const { uuid: userUUID } = req['user'];
 
       let optionalCategory = await OptionalCategoriesEntity.findOne({
         where: { uuid },
       });
 
-      if (!optionalCategory) throw new HttpException('Optional category not found', HttpStatus.NOT_FOUND);
+      if (!optionalCategory)
+        throw new HttpException(
+          'Optional category not found',
+          HttpStatus.NOT_FOUND,
+        );
 
-      optionalCategory.incrementVotes();
+      optionalCategory.incrementVotes(userUUID);
 
-      return optionalCategory.save();
+      optionalCategory.save();
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -71,9 +80,13 @@ export class OptionalCategoriesService {
         where: { uuid },
       });
 
-      if (!optionalCategory) throw new HttpException('Optional category not found', HttpStatus.NOT_FOUND);
+      if (!optionalCategory)
+        throw new HttpException(
+          'Optional category not found',
+          HttpStatus.NOT_FOUND,
+        );
 
-      optionalCategory.decrementVotes();
+      // optionalCategory.decrementVotes();
 
       return optionalCategory.save();
     } catch (error) {
@@ -88,7 +101,15 @@ export class OptionalCategoriesService {
     }
   }
 
-  async findAll(): Promise<Array<{ uuid: string; name: string; votes: number; createdAt: Date; updatedAt: Date }>> {
+  async findAll(): Promise<
+    Array<{
+      uuid: string;
+      name: string;
+      votes: number;
+      createdAt: Date;
+      updatedAt: Date;
+    }>
+  > {
     try {
       const optionalCategories = await OptionalCategoriesEntity.find();
 
@@ -101,7 +122,14 @@ export class OptionalCategoriesService {
         );
       }
 
-      return optionalCategories.map(({ id, ...rest }) => rest);
+      const formattedCategories = optionalCategories.map(
+        ({ id, votes, ...rest }) => ({
+          ...rest,
+          votes: votes.length,
+        }),
+      );
+
+      return formattedCategories;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

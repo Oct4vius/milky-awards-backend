@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { AuthService } from '../auth.service';
 import { enviroments } from 'src/env/secrets.enviroments';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -34,7 +35,9 @@ export class AuthGuard implements CanActivate {
       const user = await this.authservice.findUserById(payload.id);
       if (!user) throw new UnauthorizedException('User not found');
 
-      request['user'] = user;
+      const {  password, ...result } = user as UserEntity;
+
+      request['user'] = result;
     } catch (error) {
       console.error({ error });
       throw new UnauthorizedException('Invalid token');

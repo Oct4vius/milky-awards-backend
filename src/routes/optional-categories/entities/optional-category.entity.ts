@@ -20,8 +20,8 @@ export class OptionalCategoriesEntity extends BaseEntity {
   @Column({ length: 300, unique: true })
   name: string;
 
-  @Column({ default: 0, type: 'int' })
-  votes: number;
+  @Column({ type: 'text', array: true, default: [], nullable: false })
+  votes: string[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -29,12 +29,15 @@ export class OptionalCategoriesEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  public incrementVotes() {
-    this.votes += 1;
+  public incrementVotes(uuid: string) {
+    this.votes.push(uuid);
   }
 
-  public decrementVotes() {
-    this.votes -= 1;
+  public decrementVotes(uuid: string) {
+    this.votes = this.votes.filter((vote) => vote !== uuid);
   }
 
+  public getVotesCount(): number {
+    return this.votes.length;
+  }
 }

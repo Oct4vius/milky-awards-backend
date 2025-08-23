@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Req } from '@nestjs/common';
 import { OptionalCategoriesService } from './optional-categories.service';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { UuidParamValidator } from './dto/increment-votes.dto';
@@ -22,12 +22,12 @@ export class OptionalCategoriesController {
     return this.optionalCategoriesService.create(createOptionalCategoryDto);
   }
 
-  @Post('increase/:uuid')
-  increase(@Param() params: UuidParamValidator) {
-    return this.optionalCategoriesService.increase(params);
+  @Patch('increase/:uuid')
+  increase(@Param() params: UuidParamValidator, @Req() req) {
+    return this.optionalCategoriesService.increase(params, req);
   }
 
-  @Post('decrease/:uuid')
+  @Patch('decrease/:uuid')
   decrease(@Param() params: UuidParamValidator) {
     return this.optionalCategoriesService.decrease(params);
   }
