@@ -172,4 +172,29 @@ export class OptionalCategoriesService {
       );
     }
   }
+
+
+    async delete(uuid: string) {
+      try {
+  
+        if (!uuid)
+          throw new HttpException(
+            {
+              message: 'Params Error',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+  
+        await OptionalCategoriesEntity.delete({ uuid });
+      } catch (error) {
+        if (error instanceof HttpException) {
+          throw error;
+        }
+  
+        throw new HttpException(
+          error.message || 'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
 }

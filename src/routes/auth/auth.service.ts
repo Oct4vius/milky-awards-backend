@@ -314,9 +314,7 @@ export class AuthService {
   async deleteWhiteListUser(params: UuidParamValidator) {
     try {
       const { uuid } = params;
-
-      await WhiteListEntryEntity.delete({ uuid });
-
+      
       if (!uuid)
         throw new HttpException(
           {
@@ -325,7 +323,8 @@ export class AuthService {
           HttpStatus.BAD_REQUEST,
         );
 
-      return 'User Deleted';
+      await WhiteListEntryEntity.delete({ uuid });
+
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

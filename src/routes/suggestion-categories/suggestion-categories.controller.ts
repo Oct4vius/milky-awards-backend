@@ -1,16 +1,17 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req, Delete } from '@nestjs/common';
 import { SuggestionCategoriesService } from './suggestion-categories.service';
 import { CreateSuggestionCategoryDto } from './dto/create-suggestion-category.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
 
-UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('suggestion-categories')
 export class SuggestionCategoriesController {
   constructor(private readonly suggestionCategoriesService: SuggestionCategoriesService) {}
 
   @Post()
-  create(@Body() createSuggestionCategoryDto: CreateSuggestionCategoryDto) {
-    return this.suggestionCategoriesService.create(createSuggestionCategoryDto);
+  create(@Body() createSuggestionCategoryDto: CreateSuggestionCategoryDto, @Req() req) {
+    return this.suggestionCategoriesService.create(createSuggestionCategoryDto, req);
   }
 
   @Get()
@@ -18,9 +19,10 @@ export class SuggestionCategoriesController {
     return this.suggestionCategoriesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.suggestionCategoriesService.findOne(+id);
+  @Delete(':uuid')
+  delete(@Param('uuid') uuid: string) {
+    // Optionally validate UUID format here
+    return this.suggestionCategoriesService.delete(uuid);
   }
 
 }

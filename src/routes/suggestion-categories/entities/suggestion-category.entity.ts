@@ -12,6 +12,12 @@ export class SuggestionCategoryEntity extends BaseEntity {
   @Column({ length: 300, unique: true })
   name: string;
 
+  @Column({ type: 'text'})
+  author: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }
