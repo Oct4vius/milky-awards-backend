@@ -10,7 +10,7 @@ export class SuggestionCategoryEntity extends BaseEntity {
   uuid: string;
 
   @Column({ length: 300, unique: true })
-  name: string;
+  title: string;
 
   @Column({ type: 'text'})
   author: string;

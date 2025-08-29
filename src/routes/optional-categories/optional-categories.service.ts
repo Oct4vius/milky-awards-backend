@@ -8,10 +8,10 @@ import { Request } from 'express';
 export class OptionalCategoriesService {
   async create(createOptionalCategoryDto: CreateOptionalCategoryDto) {
     try {
-      const { name } = createOptionalCategoryDto;
+      const { title } = createOptionalCategoryDto;
 
       const doExists = await OptionalCategoriesEntity.findOne({
-        where: { name },
+        where: { title },
       });
 
       if (doExists)
@@ -23,7 +23,7 @@ export class OptionalCategoriesService {
         );
 
       let newOptionalCategory = OptionalCategoriesEntity.create({
-        name,
+        title,
       });
 
       let savedOptinalCategory = await newOptionalCategory.save();
@@ -131,7 +131,7 @@ export class OptionalCategoriesService {
   async findAll(req: Request): Promise<
     Array<{
       uuid: string;
-      name: string;
+      title: string;
       votes: number;
       userVoted: boolean;
       createdAt: Date;

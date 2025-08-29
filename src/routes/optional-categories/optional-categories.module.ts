@@ -6,6 +6,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   controllers: [OptionalCategoriesController],
   providers: [OptionalCategoriesService],
-  imports: [AuthModule]
+  imports: [AuthModule],
+  exports: [OptionalCategoriesService],
 })
 export class OptionalCategoriesModule {}

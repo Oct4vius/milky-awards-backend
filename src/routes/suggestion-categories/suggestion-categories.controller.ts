@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards, Req, Delete } from '@nes
 import { SuggestionCategoriesService } from './suggestion-categories.service';
 import { CreateSuggestionCategoryDto } from './dto/create-suggestion-category.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
+import { ApproveCategoryDto } from './dto/approve-category.dto';
 
 @UseGuards(AuthGuard)
 @Controller('suggestion-categories')
@@ -19,6 +19,11 @@ export class SuggestionCategoriesController {
     return this.suggestionCategoriesService.findAll();
   }
 
+  @Post('approve/:uuid')
+  approve(@Body() approveCategoryDto: ApproveCategoryDto, @Param('uuid') uuid: string) {
+    return this.suggestionCategoriesService.approve(approveCategoryDto, uuid);
+  }
+  
   @Delete(':uuid')
   delete(@Param('uuid') uuid: string) {
     // Optionally validate UUID format here
