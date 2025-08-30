@@ -8,6 +8,8 @@ import { OptionalCategoriesModule } from './routes/optional-categories/optional-
 import { OptionalCategoriesEntity } from './routes/optional-categories/entities/optional-category.entity';
 import { SuggestionCategoriesModule } from './routes/suggestion-categories/suggestion-categories.module';
 import { SuggestionCategoryEntity } from './routes/suggestion-categories/entities/suggestion-category.entity';
+import { ObligatoryCategoriesModule } from './routes/obligatory-categories/obligatory-categories.module';
+import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entities/obligatory-category.entity';
 
 @Module({
   imports: [AuthModule,
@@ -18,10 +20,10 @@ import { SuggestionCategoryEntity } from './routes/suggestion-categories/entitie
       ssl: {
         rejectUnauthorized: false
       },
-      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity, SuggestionCategoryEntity],
+      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity, SuggestionCategoryEntity, ObligatoryCategoriesEntity],
       autoLoadEntities: true,
       synchronize: false,
-    }), OptionalCategoriesModule, SuggestionCategoriesModule
+    }), OptionalCategoriesModule, SuggestionCategoriesModule, ObligatoryCategoriesModule
   ],
 })
 export class AppModule {}
