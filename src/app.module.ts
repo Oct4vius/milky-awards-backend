@@ -12,18 +12,31 @@ import { ObligatoryCategoriesModule } from './routes/obligatory-categories/oblig
 import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entities/obligatory-category.entity';
 
 @Module({
-  imports: [AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }), 
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false
+      ssl: true,
+      extra: {
+        ssl: {
+          rejectUnauthorized: false,
+        },
       },
-      entities: [UserEntity, WhiteListEntryEntity, OptionalCategoriesEntity, SuggestionCategoryEntity, ObligatoryCategoriesEntity],
+      entities: [
+        UserEntity,
+        WhiteListEntryEntity,
+        OptionalCategoriesEntity,
+        SuggestionCategoryEntity,
+        ObligatoryCategoriesEntity,
+      ],
       autoLoadEntities: true,
       synchronize: false,
-    }), OptionalCategoriesModule, SuggestionCategoriesModule, ObligatoryCategoriesModule
+    }),
+    OptionalCategoriesModule,
+    SuggestionCategoriesModule,
+    ObligatoryCategoriesModule,
   ],
 })
 export class AppModule {}
