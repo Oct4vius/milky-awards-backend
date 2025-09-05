@@ -4,11 +4,17 @@ import { ObligatoryCategoriesEntity } from './entities/obligatory-category.entit
 @Injectable()
 export class ObligatoryCategoriesService {
 
-  findAll() {
+  async findAll() {
     try {
-      let suggestionCategories = ObligatoryCategoriesEntity.find();
+      const suggestionCategories = await ObligatoryCategoriesEntity.find();
 
-      return suggestionCategories;
+      const formattedCategories = suggestionCategories.map((cat) => {
+        const {id, ...rest} = cat
+
+        return rest
+      })
+
+      return formattedCategories;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

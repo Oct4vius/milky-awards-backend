@@ -5,12 +5,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CreateSuggestionCategoryDto } from './dto/create-suggestion-category.dto';
-import { ErrorResponse } from 'src/interface/error.interface';
 import { SuggestionCategoryEntity } from './entities/suggestion-category.entity';
-import { UuidParamValidator } from '../optional-categories/dto/increment-votes.dto';
 import { ApproveCategoryDto } from './dto/approve-category.dto';
 import { OptionalCategoriesService } from '../optional-categories/optional-categories.service';
-import { title } from 'process';
 
 @Injectable()
 export class SuggestionCategoriesService {
@@ -56,11 +53,17 @@ export class SuggestionCategoriesService {
     }
   }
 
-  findAll() {
+  async findAll() {
     try {
-      let suggestionCategories = SuggestionCategoryEntity.find();
+      const suggestionCategories = await SuggestionCategoryEntity.find();
 
-      return suggestionCategories;
+      const formattedCategories = suggestionCategories.map((cat) => {
+        const { id, ...rest } = cat
+
+        return rest
+      }) 
+
+      return formattedCategories;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
