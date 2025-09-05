@@ -18,9 +18,7 @@ import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entit
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false
-      },
+      ssl: true,
       extra: {
         ssl: {
           rejectUnauthorized: false,
