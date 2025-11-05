@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './routes/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+
+import DataSource from '../data-source'
+
 import { UserEntity } from './routes/auth/entities/user.entity';
 import { WhiteListEntryEntity } from './routes/auth/entities/whitelist.entity';
 import { OptionalCategoriesModule } from './routes/optional-categories/optional-categories.module';
@@ -16,18 +19,7 @@ import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entit
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT!,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: true,
-      extra: {
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      },
+      ...DataSource.options,
       entities: [
         UserEntity,
         WhiteListEntryEntity,
@@ -36,7 +28,7 @@ import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entit
         ObligatoryCategoriesEntity,
       ],
       autoLoadEntities: true,
-      synchronize: false,
+
     }),
     OptionalCategoriesModule,
     SuggestionCategoriesModule,
