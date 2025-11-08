@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { enviroments } from 'src/env/secrets.enviroments';
+import { enviroments } from 'src/environment/secrets.enviroments';
 import { JwtPayload } from 'src/routes/auth/interfaces/jwt-payload.interface';
 
 

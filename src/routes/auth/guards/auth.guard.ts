@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { AuthService } from '../auth.service';
-import { enviroments } from 'src/env/secrets.enviroments';
+import { enviroments } from 'src/environment/secrets.enviroments';
 import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
