@@ -3,6 +3,7 @@ import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { UuidParamValidator } from './dto/increment-votes.dto';
 import { Request } from 'express';
+import { ObligatoryCategoriesEntity } from '../obligatory-categories/entities/obligatory-category.entity';
 
 @Injectable()
 export class OptionalCategoriesService {
@@ -174,27 +175,59 @@ export class OptionalCategoriesService {
   }
 
 
-    async delete(uuid: string) {
-      try {
-  
-        if (!uuid)
-          throw new HttpException(
-            {
-              message: 'Params Error',
-            },
-            HttpStatus.BAD_REQUEST,
-          );
-  
-        await OptionalCategoriesEntity.delete({ uuid });
-      } catch (error) {
-        if (error instanceof HttpException) {
-          throw error;
-        }
-  
+  async delete(uuid: string) {
+    try {
+
+      if (!uuid)
         throw new HttpException(
-          error.message || 'Internal server error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          {
+            message: 'Params Error',
+          },
+          HttpStatus.BAD_REQUEST,
         );
+
+      await OptionalCategoriesEntity.delete({ uuid });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
       }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
+  }
+
+  async optionalToObligatory(){
+    try {
+      
+      const topCat = await OptionalCategoriesEntity.find({
+        order: {
+          votes: 'DESC'
+        },
+        take: 9
+      })
+
+      const newObligatoryCat = topCat.map((categorie) => (
+        ObligatoryCategoriesEntity.create({
+          title: categorie.title
+        })
+      ))
+
+      ObligatoryCategoriesEntity.save(newObligatoryCat)
+
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
 }

@@ -13,6 +13,7 @@ import { OptionalCategoriesService } from './optional-categories.service';
 import { CreateOptionalCategoryDto } from './dto/create-optional-category.dto';
 import { UuidParamValidator } from './dto/increment-votes.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @UseGuards(AuthGuard)
 @Controller('optional-categories')
@@ -24,6 +25,12 @@ export class OptionalCategoriesController {
   @Get()
   findAll(@Req() req) {
     return this.optionalCategoriesService.findAll(req);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('optional-to-obligatory')
+  optionalToObligatory(){
+    return this.optionalCategoriesService.optionalToObligatory()
   }
 
   @Post()
