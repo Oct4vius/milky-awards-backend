@@ -13,6 +13,8 @@ import { SuggestionCategoriesModule } from './routes/suggestion-categories/sugge
 import { SuggestionCategoryEntity } from './routes/suggestion-categories/entities/suggestion-category.entity';
 import { ObligatoryCategoriesModule } from './routes/obligatory-categories/obligatory-categories.module';
 import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entities/obligatory-category.entity';
+import { NomineesModule } from './routes/nominees/nominees.module';
+import { NomineeEntity } from './routes/nominees/entities/nominee.entity';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entit
         OptionalCategoriesEntity,
         SuggestionCategoryEntity,
         ObligatoryCategoriesEntity,
+        NomineeEntity
       ],
       autoLoadEntities: true,
 
@@ -33,6 +36,7 @@ import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entit
     OptionalCategoriesModule,
     SuggestionCategoriesModule,
     ObligatoryCategoriesModule,
+    NomineesModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ObligatoryCategoriesService } from './obligatory-categories.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
@@ -11,6 +11,11 @@ export class ObligatoryCategoriesController {
   @Get()
   findAll() {
     return this.obligatoryCategoriesService.findAll();
+  }
+
+  @Get(':uuid/nominees')
+  findNominees(@Param('uuid') uuid: string) {
+    return this.obligatoryCategoriesService.findNominees(uuid);
   }
 
 }

@@ -27,4 +27,26 @@ export class ObligatoryCategoriesService {
     }
   }
 
+    async findNominees(uuid: string) {
+      try {
+        const category = await ObligatoryCategoriesEntity.findOne({
+          where: { uuid },
+          relations: ['nominees'],
+        });
+        if (!category) {
+          throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+        }
+        return category.nominees;
+  
+      } catch (error) {
+        if (error instanceof HttpException) {
+          throw error;
+        }
+        throw new HttpException(
+          error.message || 'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+
 }

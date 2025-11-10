@@ -51,6 +51,7 @@ export class AdminGuard implements CanActivate {
       }
     }
 
+
     if (!user.admin) {
       throw new ForbiddenException('Access denied. Admin privileges required.');
     }
