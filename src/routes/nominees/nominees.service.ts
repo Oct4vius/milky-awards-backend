@@ -7,9 +7,11 @@ import { AssignToCategoryDto } from './dto/assign-to-category.dto';
 
 @Injectable()
 export class NomineesService {
-  async create(createNomineeDto: CreateNomineeDto) {
+  async create(createNomineeDto: CreateNomineeDto, file?: Express.Multer.File) {
     try {
-      const { name, username, photoUrl } = createNomineeDto;
+      const { name, username } = createNomineeDto;
+
+      const photoUrl = file ? `/uploads/nominees/${file.filename}` : undefined;
 
       const newNominee = NomineeEntity.create({
         name,

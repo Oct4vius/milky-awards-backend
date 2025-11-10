@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './routes/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 import DataSource from '../data-source'
 
+import { AuthModule } from './routes/auth/auth.module';
 import { UserEntity } from './routes/auth/entities/user.entity';
 import { WhiteListEntryEntity } from './routes/auth/entities/whitelist.entity';
 import { OptionalCategoriesModule } from './routes/optional-categories/optional-categories.module';
@@ -20,6 +22,10 @@ import { NomineeEntity } from './routes/nominees/entities/nominee.entity';
   imports: [
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads/nominees'),
+      serveRoot: '/uploads/nominees',
+    }),
     TypeOrmModule.forRoot({
       ...DataSource.options,
       entities: [

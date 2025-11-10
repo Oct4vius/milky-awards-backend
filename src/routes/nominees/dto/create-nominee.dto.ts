@@ -9,9 +9,5 @@ export class CreateNomineeDto {
     @IsString()
     username: string;
 
-    @IsOptional()
-    @IsString()
-    photoUrl: string;
-
 
 }
