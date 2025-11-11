@@ -8,13 +8,14 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { NomineesService } from './nominees.service';
 import { CreateNomineeDto } from './dto/create-nominee.dto';
 import { UpdateNomineeDto } from './dto/update-nominee.dto';
-import { AssignToCategoryDto } from './dto/assign-to-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { IncreaseVotationDto } from './dto/increase-votation.dto';
 
 @Controller('nominees')
 export class NomineesController {
@@ -54,9 +55,9 @@ export class NomineesController {
     return this.nomineesService.create(createNomineeDto, file);
   }
 
-  @Post('assign-to-category')
-  assignToCategory(@Body() assignToCategoryDto: AssignToCategoryDto) {
-    return this.nomineesService.assignToCategory(assignToCategoryDto);
+  @Post('increase')
+  increaseVotation(@Req() req, @Body() assignToCategoryDto: IncreaseVotationDto) {
+    return this.nomineesService.increaseVotation(req, assignToCategoryDto);
   }
 
   @Get()

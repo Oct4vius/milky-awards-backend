@@ -1,6 +1,6 @@
-import { UserEntity } from 'src/routes/auth/entities/user.entity';
-import { WhiteListEntryEntity } from 'src/routes/auth/entities/whitelist.entity';
+
 import { NomineeEntity } from 'src/routes/nominees/entities/nominee.entity';
+
 import {
   BaseEntity,
   Column,
@@ -28,12 +28,10 @@ export class ObligatoryCategoriesEntity extends BaseEntity {
   @Column({ length: 300, default: 'individual', nullable: false })
   type: 'individual' | 'moment';
 
-  @ManyToMany(
-    () => NomineeEntity,
-    (nominee) => nominee.obligatoryCategories // points back to the property in NomineeEntity
-  )
+  @ManyToMany(() => NomineeEntity, (nominee) => nominee.categories)
+  @JoinTable()
   nominees: NomineeEntity[];
-  
+
 
   @CreateDateColumn()
   createdAt: Date;
