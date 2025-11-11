@@ -4,6 +4,7 @@ import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { UuidParamValidator } from './dto/increment-votes.dto';
 import { Request } from 'express';
 import { ObligatoryCategoriesEntity } from '../obligatory-categories/entities/obligatory-category.entity';
+import dataSource from 'data-source';
 
 @Injectable()
 export class OptionalCategoriesService {
@@ -46,10 +47,11 @@ export class OptionalCategoriesService {
     try {
       const { uuid } = params;
 
-      const { uuid: userUUID } = req['user'];
+      const { id } = req['user'];
 
       let optionalCategory = await OptionalCategoriesEntity.findOne({
         where: { uuid },
+        relations: ['votes'],
       });
 
       if (!optionalCategory)
@@ -58,21 +60,20 @@ export class OptionalCategoriesService {
           HttpStatus.NOT_FOUND,
         );
 
-      if (optionalCategory.didUserVote(userUUID))
+      if (optionalCategory.didUserVote(id))
         throw new HttpException(
           'Ya tu votaste en eto. Dime a ve',
           HttpStatus.BAD_REQUEST,
         );
 
-
-      optionalCategory.incrementVotes(userUUID);
+      optionalCategory.votes.push(req['user']);
 
       const {votes, ...rest} = await optionalCategory.save();
       
       return {
         ...rest,
         votes: votes.length,
-        userVoted: votes === undefined ? false : votes.includes(userUUID),
+        userVoted: votes.length ? votes.some(user => user.id === id) : false,
       }
     } catch (error) {
       if (error instanceof HttpException) {
@@ -90,10 +91,11 @@ export class OptionalCategoriesService {
     try {
       const { uuid } = params;
 
-      const { uuid: userUUID } = req['user'];
+      const { id } = req['user'];
 
       let optionalCategory = await OptionalCategoriesEntity.findOne({
         where: { uuid },
+        relations: ['votes'],
       });
 
       if (!optionalCategory)
@@ -102,20 +104,20 @@ export class OptionalCategoriesService {
           HttpStatus.NOT_FOUND,
         );
 
-      if (!optionalCategory.didUserVote(userUUID))
+      if (!optionalCategory.didUserVote(id))
         throw new HttpException(
           'Tu no has votado en eto. Dime a ve',
           HttpStatus.BAD_REQUEST,
         );
 
-      optionalCategory.decrementVotes(userUUID);
+      optionalCategory.votes = optionalCategory.votes.filter(user => user.id !== id);
 
       const {votes, ...rest} = await optionalCategory.save();
       
       return {
         ...rest,
         votes: votes.length,
-        userVoted: votes === undefined ? false : votes.includes(userUUID),
+        userVoted: votes.length ? votes.some(user => user.id === id) : false,
       }
     } catch (error) {
       if (error instanceof HttpException) {
@@ -140,8 +142,8 @@ export class OptionalCategoriesService {
     }>
   > {
     try {
-      const optionalCategories = await OptionalCategoriesEntity.find();
-      const { uuid: userUUID } = req['user'];
+      const optionalCategories = await OptionalCategoriesEntity.find({relations: ['votes']});
+      const { id: userID } = req['user'];
 
       if (!optionalCategories || optionalCategories.length === 0) {
         throw new HttpException(
@@ -154,11 +156,13 @@ export class OptionalCategoriesService {
 
 
       const formattedCategories = optionalCategories.map(
-        ({ id, votes, ...rest }) => ({
+        ({ id, votes, didUserVote, ...rest }) => {
+          return ({
           ...rest,
           votes: votes.length ?? 0,
-          userVoted: votes === undefined ? false : votes.includes(userUUID),
-        }),
+          userVoted: votes.length ? votes.some(user => user.id === userID) : false,
+        })
+        },
       );
 
       return formattedCategories;

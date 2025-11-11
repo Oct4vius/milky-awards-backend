@@ -5,10 +5,14 @@ import {
   CreateDateColumn,
   Entity,
   Generated,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { compareSync, hashSync } from 'bcrypt';
+import { OptionalCategoriesEntity } from 'src/routes/optional-categories/entities/optional-category.entity';
 
 @Entity({name: 'Users'})
 export class UserEntity extends BaseEntity {
@@ -39,6 +43,10 @@ export class UserEntity extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToMany(() => OptionalCategoriesEntity, (optionalCategory) => optionalCategory.votes, { nullable: true })
+  @JoinTable()
+  optionalCategory: OptionalCategoriesEntity;
 
   @BeforeInsert()
   encryptPassword() {

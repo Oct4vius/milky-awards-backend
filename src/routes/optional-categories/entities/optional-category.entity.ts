@@ -1,9 +1,13 @@
+import { UserEntity } from 'src/routes/auth/entities/user.entity';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   Generated,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -20,8 +24,6 @@ export class OptionalCategoriesEntity extends BaseEntity {
   @Column({ length: 300, unique: true })
   title: string;
 
-  @Column({ type: 'text', array: true, default: [], nullable: false })
-  votes: string[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -29,17 +31,15 @@ export class OptionalCategoriesEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  public incrementVotes(uuid: string) {
-    this.votes.push(uuid);
-  }
+  @ManyToMany(() => UserEntity, (user) => user.optionalCategory, {nullable: true})
+  votes: UserEntity[];
+  
 
-  public decrementVotes(uuid: string) {
-    this.votes = this.votes.filter((vote) => vote !== uuid);
-  }
+  public didUserVote(id: number): boolean {
 
+    if (!this.votes || this.votes.length === 0) return false;
 
-  public didUserVote(uuid: string): boolean {
-    return this.votes.includes(uuid);
+    return this.votes.some(user => user.id === id);
   }
 
   public getVotesCount(): number {
