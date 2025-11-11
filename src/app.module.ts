@@ -17,6 +17,7 @@ import { ObligatoryCategoriesModule } from './routes/obligatory-categories/oblig
 import { ObligatoryCategoriesEntity } from './routes/obligatory-categories/entities/obligatory-category.entity';
 import { NomineesModule } from './routes/nominees/nominees.module';
 import { NomineeEntity } from './routes/nominees/entities/nominee.entity';
+import { VotesEntity } from './routes/nominees/entities/votes.entity';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { NomineeEntity } from './routes/nominees/entities/nominee.entity';
         OptionalCategoriesEntity,
         SuggestionCategoryEntity,
         ObligatoryCategoriesEntity,
-        NomineeEntity
+        NomineeEntity,
+        VotesEntity
       ],
       autoLoadEntities: true,
 

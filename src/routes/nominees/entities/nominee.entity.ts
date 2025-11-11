@@ -7,30 +7,11 @@ import {
   Generated,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-[
-  {
-    title: 'el mejor del a;o',
-    nominados: [
-      {
-        name: 'Lionel Messi',
-        voters: ['user1', 'user2', 'user3'],
-      },
-    ],
-  },
-  {
-    title: 'la mejor del a;o',
-    nominados: [
-      {
-        name: 'Lionel Messi',
-        voters: ['user1', 'user2', 'user3'],
-      },
-    ],
-  },
-];
+import { VotesEntity } from './votes.entity';
 
 @Entity({ name: 'Nominees' })
 export class NomineeEntity extends BaseEntity {
@@ -52,6 +33,9 @@ export class NomineeEntity extends BaseEntity {
 
   @Column({ length: 300, default: 'individual', nullable: false })
   type: 'individual' | 'moment';
+
+  @OneToMany(() => VotesEntity, (vote) => vote.nominee)
+  votes: VotesEntity[];
 
   @ManyToMany(() => ObligatoryCategoriesEntity, (category) => category.nominees)
   @JoinTable()

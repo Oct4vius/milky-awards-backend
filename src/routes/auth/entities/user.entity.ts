@@ -8,18 +8,20 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { compareSync, hashSync } from 'bcrypt';
 import { OptionalCategoriesEntity } from 'src/routes/optional-categories/entities/optional-category.entity';
+import { VotesEntity } from 'src/routes/nominees/entities/votes.entity';
 
-@Entity({name: 'Users'})
+@Entity({ name: 'Users' })
 export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({nullable: false})
+  @Column({ nullable: false })
   @Generated('uuid')
   uuid: string;
 
@@ -44,7 +46,14 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => OptionalCategoriesEntity, (optionalCategory) => optionalCategory.votes, { nullable: true })
+  @OneToMany(() => VotesEntity, (vote) => vote.user)
+  votes: VotesEntity[];
+
+  @ManyToMany(
+    () => OptionalCategoriesEntity,
+    (optionalCategory) => optionalCategory.votes,
+    { nullable: true },
+  )
   @JoinTable()
   optionalCategory: OptionalCategoriesEntity;
 

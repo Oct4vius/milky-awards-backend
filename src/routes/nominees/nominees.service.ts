@@ -4,6 +4,8 @@ import { UpdateNomineeDto } from './dto/update-nominee.dto';
 import { NomineeEntity } from './entities/nominee.entity';
 import { ObligatoryCategoriesEntity } from '../obligatory-categories/entities/obligatory-category.entity';
 import { IncreaseVotationDto } from './dto/increase-votation.dto';
+import { UserEntity } from '../auth/entities/user.entity';
+import { VotesEntity } from './entities/votes.entity';
 
 @Injectable()
 export class NomineesService {
@@ -35,7 +37,7 @@ export class NomineesService {
 
   async findAll() {
     try {
-      const nominee = await NomineeEntity.find();
+      const nominee = await NomineeEntity.find({ relations: ['categories'] });
 
       if (!nominee) {
         throw new HttpException('Nominee not found', HttpStatus.NOT_FOUND);
@@ -112,42 +114,100 @@ export class NomineesService {
     }
   }
 
-  async increaseVotation(req: Request, assignToCategoryDto: IncreaseVotationDto) {
-    // try {
-    //   const { nomineeUUID, categoryUUID, voteUUID } = assignToCategoryDto;
+  async increaseVotation(
+    req: Request,
+    assignToCategoryDto: IncreaseVotationDto,
+  ) {
+    try {
+      const { nomineeUUID, categoryUUID } = assignToCategoryDto;
 
+      const user = await UserEntity.findOne({ where: { uuid: req['user'].uuid }});
+
+      const nominee = await NomineeEntity.findOne({
+        where: { uuid: nomineeUUID },
+      });
+
+      if (!nominee) {
+        throw new HttpException('Nominee not found', HttpStatus.NOT_FOUND);
+      }
+
+      const category = await ObligatoryCategoriesEntity.findOne({
+        where: { uuid: categoryUUID },
+        relations: {nominees: {votes: {user: true}}},
+      });
+
+      if (!category)
+        throw new HttpException(
+          'Obligatory Category not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+
+      const nomineeIndex = await this.getNomineeIndexInCategory(category, nominee);
 
       
-    //   const nominee = await NomineeEntity.findOne({
-    //     where: { uuid: nomineeUUID },
-    //   });
-
-    //   if (!nominee) {
-    //     throw new HttpException('Nominee not found', HttpStatus.NOT_FOUND);
-    //   }
-
-    //   const obligatoryCategory = await ObligatoryCategoriesEntity.findOne({
-    //     where: { uuid: categoryUUID },
-    //   });
-
-    //   if (!obligatoryCategory) throw new HttpException('Obligatory Category not found', HttpStatus.NOT_FOUND);
-      
 
 
-    //   return;
 
-    // } catch (error) {
-    //   if (error instanceof HttpException) {
-    //     throw error;
-    //   }
-    //   throw new HttpException(
-    //     error.message || 'Internal server error',
-    //     HttpStatus.INTERNAL_SERVER_ERROR,
-    //   );
-    // }
+    
+
+      category.nominees[nomineeIndex].votes.push
+
+      return category.save()
+
+    } catch (error) {
+      console.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
 
+  async getNomineeIndexInCategory(category: ObligatoryCategoriesEntity, nominee: NomineeEntity) {
+      const isAssigned = category.nominees.some((nomineeItem) => nomineeItem.id === nominee.id);
+      if (!isAssigned) await this.assignToCategory(category, nominee);
+      return category.nominees.findIndex((nomineeItem) => nomineeItem.id === nominee.id);
+  }
+
+  async assignToCategory(cat: ObligatoryCategoriesEntity, nom: NomineeEntity) {
+    try {
+      cat.nominees.push(nom);
+
+      await cat.save();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
 
+  async assignVotationToNominee(vote: VotesEntity, nominee: NomineeEntity) {
+    
+  }
+
+  async createVotation() {
+    try {
+      const votation = VotesEntity.create();
+
+      return await votation.save();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        error.message || 'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

@@ -32,7 +32,6 @@ export class ObligatoryCategoriesEntity extends BaseEntity {
   @JoinTable()
   nominees: NomineeEntity[];
 
-
   @CreateDateColumn()
   createdAt: Date;
 

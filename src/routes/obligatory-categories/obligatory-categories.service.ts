@@ -6,7 +6,7 @@ export class ObligatoryCategoriesService {
 
   async findAll() {
     try {
-      const suggestionCategories = await ObligatoryCategoriesEntity.find();
+      const suggestionCategories = await ObligatoryCategoriesEntity.find({relations: {nominees: {votes: true}}});
 
       const formattedCategories = suggestionCategories.map((cat) => {
         const {id, ...rest} = cat
