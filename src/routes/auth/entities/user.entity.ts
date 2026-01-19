@@ -46,7 +46,7 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => VotesEntity, (vote) => vote.user)
+  @ManyToMany(() => VotesEntity, (vote) => vote.votedUsers)
   votes: VotesEntity[];
 
   @ManyToMany(

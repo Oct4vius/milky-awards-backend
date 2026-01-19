@@ -39,7 +39,6 @@ import { VotesEntity } from './routes/nominees/entities/votes.entity';
         VotesEntity
       ],
       autoLoadEntities: true,
-
     }),
     OptionalCategoriesModule,
     SuggestionCategoriesModule,

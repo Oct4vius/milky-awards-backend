@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  UseGuards,
+  Res,
 } from '@nestjs/common';
 import { NomineesService } from './nominees.service';
 import { CreateNomineeDto } from './dto/create-nominee.dto';
@@ -16,7 +18,9 @@ import { UpdateNomineeDto } from './dto/update-nominee.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { IncreaseVotationDto } from './dto/increase-votation.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('nominees')
 export class NomineesController {
   constructor(private readonly nomineesService: NomineesService) {}
@@ -56,8 +60,8 @@ export class NomineesController {
   }
 
   @Post('increase')
-  increaseVotation(@Req() req, @Body() assignToCategoryDto: IncreaseVotationDto) {
-    return this.nomineesService.increaseVotation(req, assignToCategoryDto);
+  increaseVotation(@Req() req, @Res() res, @Body() assignToCategoryDto: IncreaseVotationDto) {
+    return this.nomineesService.increaseVotation(req, res, assignToCategoryDto);
   }
 
   @Get()

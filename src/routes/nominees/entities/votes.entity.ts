@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   Entity,
   Generated,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -26,13 +28,19 @@ export class VotesEntity extends BaseEntity {
 
   @ManyToOne(() => NomineeEntity, (nominee) => nominee.votes)
   nominee: NomineeEntity;
-
-  @ManyToOne(() => UserEntity, (user) => user.votes)
-  user: UserEntity;
-
+  
+  
+  @ManyToMany(() => UserEntity, (user) => user.votes)
+  @JoinTable()
+  votedUsers: UserEntity[];
+  
   @CreateDateColumn()
   createdAt: Date;
-
+  
   @UpdateDateColumn()
   updatedAt: Date;
+  
+  get count(): number {
+    return this.votedUsers?.length ?? 0;
+  }
 }

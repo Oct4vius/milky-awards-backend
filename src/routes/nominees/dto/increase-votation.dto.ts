@@ -7,9 +7,5 @@ export  class IncreaseVotationDto {
 
     @IsString()
     nomineeUUID: string;
-
-    @IsString()
-    votationUUID: string;
-
 }
 
