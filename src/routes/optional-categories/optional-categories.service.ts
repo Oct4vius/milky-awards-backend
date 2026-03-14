@@ -4,7 +4,7 @@ import { OptionalCategoriesEntity } from './entities/optional-category.entity';
 import { UuidParamValidator } from './dto/increment-votes.dto';
 import { Request } from 'express';
 import { ObligatoryCategoriesEntity } from '../obligatory-categories/entities/obligatory-category.entity';
-import dataSource from 'data-source';
+
 
 @Injectable()
 export class OptionalCategoriesService {
